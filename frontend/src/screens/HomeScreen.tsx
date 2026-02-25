@@ -1,0 +1,281 @@
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from '../context/AuthContext';
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+
+export default function HomeScreen() {
+  const { user } = useAuth();
+  const quickActions = [
+    {
+      id: 'search',
+      title: 'Find a Ride',
+      subtitle: 'Browse available rides',
+      icon: 'search',
+      color: '#007AFF',
+      onPress: () => router.push('/(tabs)/search'),
+    },
+    {
+      id: 'publish',
+      title: 'Publish a Ride',
+      subtitle: 'Share your journey',
+      icon: 'add-circle',
+      color: '#34C759',
+      onPress: () => router.push('/(tabs)/publish'),
+      requiresAuth: true,
+      requiresRider: true,
+    },
+    {
+      id: 'rides',
+      title: 'My Rides',
+      subtitle: 'View your bookings',
+      icon: 'car',
+      color: '#FF9500',
+      onPress: () => router.push('/(tabs)/my-rides'),
+      requiresAuth: true,
+    },
+  ];
+
+  const visibleActions = quickActions.filter(action => {
+    if (!user && action.requiresAuth) return false;
+    if (action.requiresRider && !user?.is_rider) return false;
+    return true;
+  });
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.greeting}>
+              {user ? `Hello, ${user.name}!` : 'Welcome to RideShare!'}
+            </Text>
+            <Text style={styles.subtitle}>
+              {user?.is_rider ? 'Ready to share a ride?' : 'Where are you going?'}
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={styles.profileButton}
+            onPress={() => router.push('/(tabs)/profile')}
+          >
+            <Ionicons name="person-circle" size={40} color="#007AFF" />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.statsContainer}>
+          <View style={styles.statCard}>
+            <Ionicons name="car-sport" size={24} color="#007AFF" />
+            <Text style={styles.statNumber}>12</Text>
+            <Text style={styles.statLabel}>Rides Completed</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Ionicons name="star" size={24} color="#FFD700" />
+            <Text style={styles.statNumber}>4.8</Text>
+            <Text style={styles.statLabel}>Rating</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Ionicons name="leaf" size={24} color="#34C759" />
+            <Text style={styles.statNumber}>245</Text>
+            <Text style={styles.statLabel}>CO₂ Saved (kg)</Text>
+          </View>
+        </View>
+
+        <View style={styles.actionsContainer}>
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          {visibleActions.map((action) => (
+            <TouchableOpacity
+              key={action.id}
+              style={styles.actionCard}
+              onPress={action.onPress}
+            >
+              <View style={[styles.actionIcon, { backgroundColor: action.color + '20' }]}>
+                <Ionicons name={action.icon as any} size={24} color={action.color} />
+              </View>
+              <View style={styles.actionContent}>
+                <Text style={styles.actionTitle}>{action.title}</Text>
+                <Text style={styles.actionSubtitle}>{action.subtitle}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#ccc" />
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <View style={styles.recentContainer}>
+          <Text style={styles.sectionTitle}>Recent Activity</Text>
+          <View style={styles.activityCard}>
+            <View style={styles.activityIcon}>
+              <Ionicons name="checkmark-circle" size={20} color="#34C759" />
+            </View>
+            <View style={styles.activityContent}>
+              <Text style={styles.activityTitle}>Ride to Downtown completed</Text>
+              <Text style={styles.activityTime}>2 hours ago</Text>
+            </View>
+          </View>
+          <View style={styles.activityCard}>
+            <View style={styles.activityIcon}>
+              <Ionicons name="time" size={20} color="#FF9500" />
+            </View>
+            <View style={styles.activityContent}>
+              <Text style={styles.activityTitle}>Upcoming ride to Airport</Text>
+              <Text style={styles.activityTime}>Tomorrow at 2:00 PM</Text>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    paddingTop: 10,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 0, 0, 0.05)',
+  },
+  greeting: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#1a1a1a',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 4,
+  },
+  profileButton: {
+    padding: 4,
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    marginBottom: 32,
+    gap: 16,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.05)',
+  },
+  statNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#276EF1',
+    marginTop: 8,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 4,
+    fontWeight: '500',
+  },
+  actionsContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 32,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginBottom: 20,
+  },
+  actionCard: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.05)',
+  },
+  actionIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 20,
+  },
+  actionContent: {
+    flex: 1,
+  },
+  actionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1a1a1a',
+  },
+  actionSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 4,
+  },
+  recentContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 32,
+  },
+  activityCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.05)',
+  },
+  activityIcon: {
+    marginRight: 16,
+  },
+  activityContent: {
+    flex: 1,
+  },
+  activityTitle: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#1a1a1a',
+  },
+  activityTime: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 2,
+  },
+});
