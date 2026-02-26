@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { authApi } from '../api/auth';
 import { secureStorage, StoredUser } from '../utils/secureStorage';
 
@@ -78,6 +79,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
+      // Sign out from Google (forces account picker on next login)
+      await GoogleSignin.signOut();
+      // Clear local auth data
       await secureStorage.clearAuthData();
       setUser(null);
     } catch (error) {

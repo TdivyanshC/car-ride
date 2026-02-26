@@ -1,31 +1,43 @@
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import Toast from 'react-native-toast-message';
-import { StatusBar } from 'expo-status-bar';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { Redirect } from 'expo-router';
-
-// Import providers and hooks
 import { AuthProvider, useAuth } from '../src/context/AuthContext';
 import AuthScreen from '../src/screens/AuthScreen';
 
-const queryClient = new QueryClient();
+function AuthNavigator() {
+  const { user, loading } = useAuth();
 
-function RootLayout() {
-  // Bypass authentication and go directly to main app
-  return <Redirect href="/(tabs)" />;
+  // Show loading while checking auth state
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
+
+  // If user is logged in, redirect to main app
+  if (user) {
+    return <Redirect href="/(tabs)" />;
+  }
+
+  // If not logged in, show auth screen
+  return <AuthScreen />;
 }
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <SafeAreaProvider>
-        <AuthProvider>
-          <StatusBar style="auto" />
-          <RootLayout />
-          <Toast />
-        </AuthProvider>  
-      </SafeAreaProvider>
-    </QueryClientProvider>
+    <AuthProvider>
+      <AuthNavigator />
+    </AuthProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+});

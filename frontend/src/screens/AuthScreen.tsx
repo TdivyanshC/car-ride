@@ -13,10 +13,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
+import { useRouter } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
 import useGoogleAuth from '../hooks/useGoogleAuth';
 
 export default function AuthScreen() {
+  const router = useRouter();
   const { googleLogin } = useAuth();
   const { loading: googleLoading, handleGoogleLogin } = useGoogleAuth();
   const [isLogin, setIsLogin] = useState(true);
@@ -95,6 +97,8 @@ export default function AuthScreen() {
           text1: 'Welcome!',
           text2: 'Google login successful',
         });
+        // Navigate to home after successful login
+        router.replace('/(tabs)');
       });
     } catch (error: any) {
       console.error('Google login failed:', error);
