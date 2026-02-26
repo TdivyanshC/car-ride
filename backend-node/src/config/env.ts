@@ -3,7 +3,7 @@ import path from 'path';
 
 // Load .env first, then .env.local to override with local dev values
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local'), override: true });
 
 const requiredEnvVars = [
   'PORT',

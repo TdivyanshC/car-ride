@@ -21,6 +21,13 @@ export interface AuthError {
   message: string;
 }
 
+// Custom response type that includes status
+export interface ApiResponse<T> {
+  user: T;
+  status: number;
+  ok: boolean;
+}
+
 export const authApi = {
   // Google login - send idToken to backend for verification
   googleLogin: async (idToken: string): Promise<GoogleAuthResponse> => {
@@ -59,31 +66,27 @@ export const authApi = {
     }
   },
 
-  // Get current user
-  getCurrentUser: async (token: string): Promise<{ user: User }> => {
+  // Get current user - returns response with status so caller can handle 401 vs other errors
+  getCurrentUser: async (token: string): Promise<{ status: number; user?: User; error?: string }> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/me`, {
+      const response = await fetch(`${API_BASE_URL}/api/me`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       });
 
-      if (!response.ok) {
-        let errorData: AuthError;
-        try {
-          errorData = await response.json();
-        } catch (parseError) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        throw new Error(errorData.message || 'Failed to get user');
+      if (response.ok) {
+        const data = await response.json();
+        return { status: response.status, user: data.user };
+      } else {
+        // Return status so caller can distinguish 401 from other errors
+        return { status: response.status, error: `HTTP error: ${response.status}` };
       }
-
-      const data = await response.json();
-      return data;
     } catch (error: any) {
       console.error('Get current user error:', error);
-      throw error;
+      // Network error - return special status
+      return { status: 0, error: error.message };
     }
   },
 };

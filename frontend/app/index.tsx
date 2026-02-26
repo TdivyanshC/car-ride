@@ -5,10 +5,11 @@ import { AuthProvider, useAuth } from '../src/context/AuthContext';
 import AuthScreen from '../src/screens/AuthScreen';
 
 function AuthNavigator() {
-  const { user, loading } = useAuth();
+  const { user, loading, isAuthLoaded } = useAuth();
 
-  // Show loading while checking auth state
-  if (loading) {
+  // Show loading screen while auth state is being restored
+  // This ensures user never briefly sees login screen on app start
+  if (!isAuthLoaded) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#007AFF" />
@@ -16,12 +17,15 @@ function AuthNavigator() {
     );
   }
 
-  // If user is logged in, redirect to main app
+  // After auth is loaded:
+  // - If user exists, redirect to main app (tabs)
+  // - If no user, show auth screen
+  // The user is already restored from storage before this check
   if (user) {
     return <Redirect href="/(tabs)" />;
   }
 
-  // If not logged in, show auth screen
+  // No valid token - show login screen
   return <AuthScreen />;
 }
 
