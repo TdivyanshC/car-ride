@@ -22,8 +22,10 @@ export interface AuthError {
 }
 
 export const authApi = {
-  // Google login
+  // Google login - send idToken to backend for verification
   googleLogin: async (idToken: string): Promise<GoogleAuthResponse> => {
+    console.log('Sending idToken to backend:', idToken?.substring(0, 20) + '...');
+    
     try {
       const response = await fetch(`${API_BASE_URL}/auth/google`, {
         method: 'POST',
